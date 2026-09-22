@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 public class Inventari {
 
-    private ArrayList<Objecte> objectes;
+    private final ArrayList<Objecte> objectes;
 
     public Inventari() {
         this.objectes = new ArrayList<>();

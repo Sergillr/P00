@@ -2,9 +2,9 @@ package com.example.model;
 
 public class Objecte {
 
-    private String nom;
-    private String descripcio;
-    private boolean agafable;
+    private final String nom;
+    private final String descripcio;
+    private final boolean agafable;
 
     public Objecte(String nom, String descripcio, boolean agafable) {
         this.nom = nom;

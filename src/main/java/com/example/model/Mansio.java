@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class Mansio {
 
-    private ArrayList<Zona> zones;
-    private ArrayList<Porta> portes;
+    private final ArrayList<Zona> zones;
+    private final ArrayList<Porta> portes;
 
     public Mansio() {
         this.zones = new ArrayList<>();

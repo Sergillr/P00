@@ -2,9 +2,9 @@ package com.example.model;
 
 public class Jugador {
 
-    private String nom;
+    private final String nom;
     private Zona zonaActual;
-    private Inventari inventari;
+    private final Inventari inventari;
 
     public Jugador(String nom) {
         this.nom = nom;

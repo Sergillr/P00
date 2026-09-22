@@ -9,7 +9,7 @@ import com.example.ui.Menu;
 public class Joc {
 
     private Jugador jugador;
-    private Mansio mansio;
+    private final Mansio mansio;
     private boolean estat;
     private Zona zonaActual;
 

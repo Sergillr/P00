@@ -2,7 +2,7 @@ package com.example.model;
 
 public abstract class Personatge {
 
-    private String nom;
+    private final String nom;
     private Zona zonaActual;
 
     public Personatge(String nom, Zona zonaInicial) {
