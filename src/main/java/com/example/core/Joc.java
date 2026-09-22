@@ -50,36 +50,23 @@ public class Joc {
 
     private void processarOrdre(String verb, String objectiu, Menu menu) {
         switch (verb) {
-            case "sortir":
+            case "sortir" -> {
                 System.out.println();
                 System.out.println("  Adeu! Gracies per jugar.");
                 estat = false;
-                break;
+            }
 
-            case "ajuda":
-                menu.mostrarInstruccions();
-                break;
+            case "ajuda" -> menu.mostrarInstruccions();
 
-            case "anar":
-                moureDireccio(objectiu);
-                break;
+            case "anar" -> moureDireccio(objectiu);
 
-            case "nord":
-            case "sud":
-            case "est":
-            case "oest":
-                moureDireccio(verb);
-                break;
-
-            case "inventari":
-                jugador.mostrarInventari();
-                break;
-
-            default:
+            case "nord", "sud", "est", "oest" -> moureDireccio(verb);
+            case "inventari" -> jugador.mostrarInventari();
+            default -> {
                 System.out.println();
                 System.out.println("  No entenc aquesta ordre. Escriu 'ajuda' per veure les comandes disponibles.");
                 System.out.println();
-                break;
+            }
         }
     }
 

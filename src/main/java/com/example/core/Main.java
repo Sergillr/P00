@@ -18,20 +18,16 @@ public class Main {
             int opcio = menu.mostrarMenuInicial();
 
             switch (opcio) {
-                case 1:
+                case 1 -> {
                     joc.iniciarPartida();
                     joc.executarPartida(menu);
-                    break;
-                case 2:
-                    menu.mostrarInstruccions();
-                    break;
-                case 3:
-                    menu.mostrarCredits();
-                    break;
-                case 4:
+                }
+                case 2 -> menu.mostrarInstruccions();
+                case 3 -> menu.mostrarCredits();
+                case 4 -> {
                     menu.mostrarMissatge("Adeu!");
                     executant = false;
-                    break;
+                }
             }
         }
 
