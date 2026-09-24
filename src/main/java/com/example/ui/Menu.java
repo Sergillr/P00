@@ -35,7 +35,7 @@ public class Menu {
         System.out.println();
         System.out.println("COMANDES DISPONIBLES:");
         System.out.println();
-        System.out.println("  ANAR [lloc]          - Desplacar-te a una zona");
+        System.out.println("  ANAR [nord/sud/est/oest/amunt/avall] - Desplacar-te en una direcció");
         System.out.println("  AGAFAR [objecte]     - Agafar un objecte");
         System.out.println("  DEIXAR [objecte]     - Deixar un objecte a terra");
         System.out.println("  ENCENDRE [objecte]   - Encendre un objecte");

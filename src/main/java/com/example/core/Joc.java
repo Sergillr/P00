@@ -60,7 +60,8 @@ public class Joc {
 
             case "anar" -> moureDireccio(objectiu);
 
-            case "nord", "sud", "est", "oest" -> moureDireccio(verb);
+            case "nord", "sud", "est", "oest", "amunt", "avall" -> moureDireccio(verb);
+            case "obrir" -> obrirDireccio(objectiu);
             case "inventari" -> jugador.mostrarInventari();
             default -> {
                 System.out.println();
@@ -73,15 +74,16 @@ public class Joc {
     private void moureDireccio(String direccio) {
         if (direccio == null || direccio.isEmpty()) {
             System.out.println();
-            System.out.println("  Cap a on vols anar? Escriu: ANAR [nord/sud/est/oest]");
+            System.out.println("  Cap a on vols anar? Escriu: ANAR [nord/sud/est/oest/amunt/avall]");
             System.out.println();
             return;
         }
 
         if (!direccio.equals("nord") && !direccio.equals("sud") &&
-            !direccio.equals("est") && !direccio.equals("oest")) {
+            !direccio.equals("est") && !direccio.equals("oest") &&
+            !direccio.equals("amunt") && !direccio.equals("avall")) {
             System.out.println();
-            System.out.println("  Direccio no valida. Utilitza: nord, sud, est o oest.");
+            System.out.println("  Direccio no valida. Utilitza: nord, sud, est, oest, amunt o avall.");
             System.out.println();
             return;
         }
@@ -114,6 +116,49 @@ public class Joc {
             System.out.println();
             System.out.println(desti.mostrarDescripcio());
         }
+    }
+
+    private void obrirDireccio(String direccio) {
+        if (direccio == null || direccio.isEmpty()) {
+            System.out.println();
+            System.out.println("  Quina porta vols obrir? Escriu: OBRIR [nord/sud/est/oest/amunt/avall]");
+            System.out.println();
+            return;
+        }
+
+        Porta porta = zonaActual.buscarPortaPerDireccio(direccio);
+        if (porta == null) {
+            System.out.println();
+            System.out.println("  No hi ha cap porta cap al " + direccio + ".");
+            System.out.println();
+            return;
+        }
+
+        if (porta.isOberta()) {
+            System.out.println();
+            System.out.println("  La porta cap al " + direccio + " ja es oberta.");
+            System.out.println();
+            return;
+        }
+
+        if (porta.isRequereixClau()) {
+            if (jugador.getInventari().conte("ClauDeCoure")) {
+                porta.obrirAmbClau();
+                System.out.println();
+                System.out.println("  Obres la porta cap al " + direccio + " amb la ClauDeCoure.");
+                System.out.println();
+            } else {
+                System.out.println();
+                System.out.println("  La porta cap al " + direccio + " necessita la ClauDeCoure (o l'ajut del Majordom).");
+                System.out.println();
+            }
+            return;
+        }
+
+        porta.obrir();
+        System.out.println();
+        System.out.println("  Obres la porta cap al " + direccio + ".");
+        System.out.println();
     }
 
     public boolean comprovarFinal() {
