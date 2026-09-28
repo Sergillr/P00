@@ -1,6 +1,13 @@
 package com.example.model;
 
 import java.util.ArrayList;
+import java.util.Random;
+
+import com.example.model.objecte.AbricDeProteccio;
+import com.example.model.objecte.ClauAnglesa;
+import com.example.model.objecte.ClauDeCoure;
+import com.example.model.objecte.GaletesDeTe;
+import com.example.model.objecte.LlanternaDeQuerosè;
 
 public class Mansio {
 
@@ -60,7 +67,8 @@ public class Mansio {
         Zona salo = new Zona("Saló de Recepció",
                 "Un ampli saló per rebre visites il·lustres. A un racó hi ha una porta de ferro pesada que dona accés als nivells inferiors de la mansió. Al nord, una porta torna al Gran Menjador. Avall, una porta de ferro baixa a l'Escala del Celler.");
         Zona taller = new Zona("Taller de mecànica",
-                "Un taller ple de motlles, engranatges i eines de ferro. Està completament a les fosques perquè el llum de gas s'ha apagat. Necessitareu una font de llum per veure-hi. A l'oest, una porta torna al Gran Menjador.");
+                "Un taller ple de motlles, engranatges i eines de ferro. Està completament a les fosques perquè el llum de gas s'ha apagat. Necessitareu una font de llum per veure-hi. A l'oest, una porta torna al Gran Menjador.",
+                true);
         Zona escala = new Zona("Escala del Celler",
                 "Un passadís humit i estret de pedra amb una escala de cargol que baixa cap a les fondàries de la mansió. La calor augmenta a cada pas. Amunt, l'escala puja al Saló de Recepció i al sud baixa al Celler de la Caldera.");
         Zona celler = new Zona("Celler de la Caldera",
@@ -136,7 +144,22 @@ public class Mansio {
         celler.afegirSortida(cellerEscala);
 
         // Objecte clau per obrir la porta tancada del celler (Despatx, calaix escriptori)
-        despatx.afegirObjecte(new Objecte("ClauDeCoure",
-                "Una clau de coure massissa. Obre la porta de ferro del Saló que baixa a l'Escala del Celler.", true));
+        despatx.afegirObjecte(new ClauDeCoure());
+        // Abric de protecció al Vestuari, ClauAnglesa al Taller, GaletesDeTe a la Cuina
+        vestidor.afegirObjecte(new AbricDeProteccio());
+        taller.afegirObjecte(new ClauAnglesa());
+        cuina.afegirObjecte(new GaletesDeTe());
+        // Llanterna aleatòria en habitació no fosca, accessible i que no sigui la caldera
+        ArrayList<Zona> candidates = new ArrayList<>();
+        for (Zona zona : zones) {
+            String nom = zona.getNom();
+            if (!zona.isFosca()
+                    && !nom.equals("Dormitori Principal")
+                    && !nom.equals("Escala del Celler")
+                    && !nom.equals("Celler de la Caldera")) {
+                candidates.add(zona);
+            }
+        }
+        candidates.get(new Random().nextInt(candidates.size())).afegirObjecte(new LlanternaDeQuerosè());
     }
 }

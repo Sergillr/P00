@@ -1,5 +1,7 @@
 package com.example.model;
 
+import com.example.model.objecte.ClauDeCoure;
+
 public class Porta {
 
     private String direccio;
@@ -59,6 +61,19 @@ public class Porta {
     }
 
     public boolean obrirAmbClau() {
+        oberta = true;
+        return true;
+    }
+
+    public boolean obrir(ClauDeCoure clau) {
+        if (clau == null || !clau.isEsLaDelSenyor()) {
+            return false;
+        }
+        oberta = true;
+        return true;
+    }
+
+    public boolean obrirPerMajordom() {
         oberta = true;
         return true;
     }

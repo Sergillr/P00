@@ -5,11 +5,13 @@ public class Jugador {
     private final String nom;
     private Zona zonaActual;
     private final Inventari inventari;
+    private boolean abricPosat;
 
     public Jugador(String nom) {
         this.nom = nom;
         this.zonaActual = null;
         this.inventari = new Inventari();
+        this.abricPosat = false;
     }
 
     public String getNom() {
@@ -38,6 +40,30 @@ public class Jugador {
 
     public Objecte obtenirObjecte(String nom) {
         return inventari.obtenir(nom);
+    }
+
+    public void agafar(Objecte objecte) {
+        if (objecte != null && objecte.isAgafable()) {
+            inventari.afegir(objecte);
+        }
+    }
+
+    public void deixar(Objecte objecte) {
+        if (objecte != null) {
+            inventari.eliminar(objecte);
+        }
+    }
+
+    public boolean isAbricPosat() {
+        return abricPosat;
+    }
+
+    public void posarAbric() {
+        abricPosat = true;
+    }
+
+    public void treureAbric() {
+        abricPosat = false;
     }
 
     public void mostrarInventari() {
