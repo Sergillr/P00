@@ -1,6 +1,7 @@
 package com.example.core;
 
 import com.example.model.personatges.Bestia;
+import com.example.model.personatges.Majordom;
 import com.example.model.Jugador;
 import com.example.model.Mansio;
 import com.example.model.Objecte;
@@ -8,6 +9,7 @@ import com.example.model.Porta;
 import com.example.model.Zona;
 import com.example.model.objecte.ClauDeCoure;
 import com.example.model.objecte.GaletesDeTe;
+import com.example.model.objecte.LlanternaDeQuerosè;
 import com.example.ui.Menu;
 import java.util.ArrayList;
 import java.util.Random;
@@ -18,7 +20,9 @@ public class Joc {
     private Mansio mansio;
     private boolean estat;
     private Zona zonaActual;
+    private Zona zonaAnterior;
     private Bestia bestia;
+    private Majordom majordom;
 
     public Joc() {
         this.jugador = new Jugador("Jugador");
@@ -36,6 +40,7 @@ public class Joc {
         this.mansio = new Mansio();
         this.estat = true;
         this.zonaActual = null;
+        this.zonaAnterior = null;
 
         mansio.inicialitzar();
 
@@ -49,9 +54,10 @@ public class Joc {
             }
         }
         bestia = new Bestia(amagatalls.get(new Random().nextInt(amagatalls.size())));
+        majordom = new Majordom(mansio.obtenirZona("Despatx del Senyor"), mansio);
 
         System.out.println();
-        System.out.println(zonaActual.mostrarDescripcio());
+        System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
     }
 
     public void executarPartida(Menu menu) {
@@ -83,10 +89,13 @@ public class Joc {
             case "anar" -> moureDireccio(objectiu);
 
             case "nord", "sud", "est", "oest", "amunt", "avall" -> moureDireccio(verb);
-            case "obrir" -> obrirDireccio(objectiu);
-            case "agafar" -> agafarObjecte(objectiu);
-            case "deixar" -> deixarObjecte(objectiu);
-            case "usar" -> usarObjecte(objectiu);
+            case "obrir" -> { if (!bloquejatPerFoscor()) obrirDireccio(objectiu); }
+            case "agafar" -> { if (!bloquejatPerFoscor()) agafarObjecte(objectiu); }
+            case "deixar" -> { if (!bloquejatPerFoscor()) deixarObjecte(objectiu); }
+            case "usar" -> { if (!bloquejatPerFoscor()) usarObjecte(objectiu); }
+            case "parlar" -> { if (!bloquejatPerFoscor()) parlarAmb(objectiu); }
+            case "encendre" -> encendreObjecte(objectiu);
+            case "apagar" -> apagarObjecte(objectiu);
             case "inventari" -> jugador.mostrarInventari();
             default -> {
                 System.out.println();
@@ -122,6 +131,13 @@ public class Joc {
             return;
         }
 
+        if (estaAFosques() && (zonaAnterior == null || porta.getZonaDesti() != zonaAnterior)) {
+            System.out.println();
+            System.out.println("  És massa fosc, no veus on vas. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
+            System.out.println();
+            return;
+        }
+
         if (!porta.isOberta()) {
             System.out.println();
             System.out.println("  La porta que porta cap a " + porta.getZonaDesti().getNom() + " es tancada.");
@@ -136,11 +152,14 @@ public class Joc {
 
         Zona desti = porta.obtenirDesti();
         if (desti != null) {
+            zonaAnterior = zonaActual;
             zonaActual = desti;
             jugador.setZonaActual(desti);
             System.out.println();
-            System.out.println(desti.mostrarDescripcio());
-            comprovarBestia();
+            System.out.println(desti.mostrarDescripcio(!estaAFosques()));
+            if (!estaAFosques()) {
+                comprovarBestia();
+            }
         }
     }
 
@@ -173,6 +192,11 @@ public class Joc {
                 System.out.println();
                 System.out.println("  Obres la porta cap al " + direccio + " amb la ClauDeCoure.");
                 System.out.println();
+            } else if (majordom != null && zonaActual == majordom.getZonaActual()
+                    && majordom.obrirPorta(porta)) {
+                System.out.println();
+                System.out.println("  El Majordom t'obre la porta cap al " + direccio + ".");
+                System.out.println();
             } else {
                 System.out.println();
                 System.out.println("  La porta cap al " + direccio + " necessita la ClauDeCoure (o l'ajut del Majordom).");
@@ -187,6 +211,23 @@ public class Joc {
         System.out.println();
     }
 
+    private Objecte buscarZona(String nom) {
+        if (nom == null || nom.isEmpty()) {
+            return null;
+        }
+        Objecte exacte = zonaActual.buscarObjecte(nom);
+        if (exacte != null) {
+            return exacte;
+        }
+        String clau = nom.toLowerCase();
+        for (Objecte obj : zonaActual.getObjectes()) {
+            if (obj.getNom().toLowerCase().contains(clau)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
     private void agafarObjecte(String nom) {
         if (nom == null || nom.isEmpty()) {
             System.out.println();
@@ -195,7 +236,7 @@ public class Joc {
             return;
         }
 
-        Objecte obj = zonaActual.buscarObjecte(nom);
+        Objecte obj = buscarZona(nom);
         if (obj == null) {
             System.out.println();
             System.out.println("  No hi ha cap '" + nom + "' aqui.");
@@ -225,7 +266,7 @@ public class Joc {
             return;
         }
 
-        Objecte obj = jugador.obtenirObjecte(nom);
+        Objecte obj = buscarInventari(nom);
         if (obj == null) {
             System.out.println();
             System.out.println("  No portes cap '" + nom + "' a sobre.");
@@ -248,7 +289,7 @@ public class Joc {
             return;
         }
 
-        Objecte obj = jugador.obtenirObjecte(nom);
+        Objecte obj = buscarInventari(nom);
         if (obj == null) {
             System.out.println();
             System.out.println("  No portes cap '" + nom + "' a sobre.");
@@ -280,6 +321,123 @@ public class Joc {
         obj.usar(jugador);
     }
 
+    private boolean estaAFosques() {
+        if (zonaActual == null || !zonaActual.isFosca()) {
+            return false;
+        }
+        Objecte obj = jugador.obtenirObjecte("LlanternaDeQuerosè");
+        return !(obj instanceof LlanternaDeQuerosè ll && ll.isEncesa());
+    }
+
+    private boolean bloquejatPerFoscor() {
+        if (!estaAFosques()) {
+            return false;
+        }
+        System.out.println();
+        System.out.println("  És massa fosc, no veus res. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
+        System.out.println();
+        return true;
+    }
+
+    private Objecte buscarInventari(String nom) {
+        if (nom == null || nom.isEmpty()) {
+            return null;
+        }
+        Objecte exacte = jugador.obtenirObjecte(nom);
+        if (exacte != null) {
+            return exacte;
+        }
+        String clau = nom.toLowerCase();
+        for (Objecte obj : jugador.getInventari().getObjectes()) {
+            if (obj.getNom().toLowerCase().contains(clau)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
+    private void encendreObjecte(String nom) {
+        if (nom == null || nom.isEmpty()) {
+            System.out.println();
+            System.out.println("  Què vols encendre? Escriu: ENCENDRE [objecte]");
+            System.out.println();
+            return;
+        }
+
+        Objecte obj = buscarInventari(nom);
+        if (obj == null) {
+            System.out.println();
+            System.out.println("  No portes cap '" + nom + "' a sobre.");
+            System.out.println();
+            return;
+        }
+
+        if (obj instanceof LlanternaDeQuerosè ll) {
+            if (ll.isEncesa()) {
+                System.out.println();
+                System.out.println("  La llanterna ja està encesa.");
+                System.out.println();
+            } else {
+                ll.encendre();
+            }
+        } else {
+            System.out.println();
+            System.out.println("  No pots encendre " + obj.getNom() + ".");
+            System.out.println();
+        }
+    }
+
+    private void apagarObjecte(String nom) {
+        if (nom == null || nom.isEmpty()) {
+            System.out.println();
+            System.out.println("  Què vols apagar? Escriu: APAGAR [objecte]");
+            System.out.println();
+            return;
+        }
+
+        Objecte obj = buscarInventari(nom);
+        if (obj == null) {
+            System.out.println();
+            System.out.println("  No portes cap '" + nom + "' a sobre.");
+            System.out.println();
+            return;
+        }
+
+        if (obj instanceof LlanternaDeQuerosè ll) {
+            if (!ll.isEncesa()) {
+                System.out.println();
+                System.out.println("  La llanterna ja està apagada.");
+                System.out.println();
+            } else {
+                ll.apagar();
+            }
+        } else {
+            System.out.println();
+            System.out.println("  No pots apagar " + obj.getNom() + ".");
+            System.out.println();
+        }
+    }
+
+    private void parlarAmb(String objectiu) {
+        if (majordom == null || zonaActual != majordom.getZonaActual()) {
+            System.out.println();
+            System.out.println("  Aquí no hi ha ningú amb qui parlar.");
+            System.out.println();
+            return;
+        }
+
+        String text = objectiu == null ? "" : objectiu.toLowerCase();
+        String resposta;
+        if (text.contains("bestia") || text.contains("bèstia")) {
+            resposta = majordom.dirUbicacioBestia(bestia);
+        } else {
+            resposta = majordom.parlar(objectiu);
+        }
+        System.out.println();
+        System.out.println("  " + resposta);
+        System.out.println();
+    }
+
     private void comprovarBestia() {
         if (bestia == null || zonaActual != bestia.getZonaActual()) {
             return;
@@ -303,6 +461,7 @@ public class Joc {
         mansio = new Mansio();
         estat = true;
         zonaActual = null;
+        zonaAnterior = null;
     }
 
     public Jugador getJugador() {
@@ -319,5 +478,9 @@ public class Joc {
 
     public Bestia getBestia() {
         return bestia;
+    }
+
+    public Majordom getMajordom() {
+        return majordom;
     }
 }
