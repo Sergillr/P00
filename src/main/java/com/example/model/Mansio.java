@@ -13,10 +13,12 @@ public class Mansio {
 
     private final ArrayList<Zona> zones;
     private final ArrayList<Porta> portes;
+    private final ArrayList<Personatge> personatges;
 
     public Mansio() {
         this.zones = new ArrayList<>();
         this.portes = new ArrayList<>();
+        this.personatges = new ArrayList<>();
     }
 
     public void afegirZona(Zona zona) {
@@ -25,6 +27,10 @@ public class Mansio {
 
     public void afegirPorta(Porta porta) {
         portes.add(porta);
+    }
+
+    public void afegirPersonatge(Personatge personatge) {
+        personatges.add(personatge);
     }
 
     public Zona obtenirZona(String nom) {
@@ -42,6 +48,10 @@ public class Mansio {
 
     public ArrayList<Porta> getPortes() {
         return portes;
+    }
+
+    public ArrayList<Personatge> getPersonatges() {
+        return personatges;
     }
 
     public void inicialitzar() {

@@ -28,25 +28,28 @@ public class Menu {
         return llegirOpcio(1, 4);
     }
 
+    public static String obtenirInstruccions() {
+        return "INSTRUCCIONS\n"
+                + "\n"
+                + "COMANDES DISPONIBLES:\n"
+                + "\n"
+                + "  ANAR [nord/sud/est/oest/amunt/avall] - Desplacar-te en una direcció\n"
+                + "  AGAFAR [objecte]     - Agafar un objecte\n"
+                + "  DEIXAR [objecte]     - Deixar un objecte a terra\n"
+                + "  ENCENDRE [objecte]   - Encendre un objecte\n"
+                + "  APAGAR [objecte]     - Apagar un objecte\n"
+                + "  OBRIR [porta]        - Obrir una porta\n"
+                + "  TANCAR [porta]       - Tancar una porta\n"
+                + "  USAR [objecte]       - Usar un objecte\n"
+                + "  PARLAR [texte]       - Parlar amb algu\n"
+                + "  INVENTARI            - Veure els objectes que portes\n"
+                + "  AJUDA                - Mostrar les comandes\n"
+                + "  SORTIR               - Sortir del joc";
+    }
+
     public void mostrarInstruccions() {
         System.out.println();
-        System.out.println("INSTRUCCIONS");
-        System.out.println();
-        System.out.println();
-        System.out.println("COMANDES DISPONIBLES:");
-        System.out.println();
-        System.out.println("  ANAR [nord/sud/est/oest/amunt/avall] - Desplacar-te en una direcció");
-        System.out.println("  AGAFAR [objecte]     - Agafar un objecte");
-        System.out.println("  DEIXAR [objecte]     - Deixar un objecte a terra");
-        System.out.println("  ENCENDRE [objecte]   - Encendre un objecte");
-        System.out.println("  APAGAR [objecte]     - Apagar un objecte");
-        System.out.println("  OBRIR [porta]        - Obrir una porta");
-        System.out.println("  TANCAR [porta]       - Tancar una porta");
-        System.out.println("  USAR [objecte]       - Usar un objecte");
-        System.out.println("  PARLAR [texte]       - Parlar amb algu");
-        System.out.println("  INVENTARI            - Veure els objectes que portes");
-        System.out.println("  AJUDA                - Mostrar les comandes");
-        System.out.println("  SORTIR               - Sortir del joc");
+        System.out.println(obtenirInstruccions());
         System.out.println();
         System.out.println();
         System.out.println("Prem ENTER per tornar al menu...");

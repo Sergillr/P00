@@ -27,12 +27,14 @@ public class Joc {
     private Bestia bestia;
     private Majordom majordom;
     private ServentGonzalo gonzalo;
+    private final Interpretador interpretador;
 
     public Joc() {
         this.jugador = new Jugador("Jugador");
         this.mansio = new Mansio();
         this.estat = true;
         this.zonaActual = null;
+        this.interpretador = new Interpretador();
     }
 
     public void iniciarPartida() {
@@ -60,6 +62,9 @@ public class Joc {
         bestia = new Bestia(amagatalls.get(new Random().nextInt(amagatalls.size())));
         majordom = new Majordom(mansio.obtenirZona("Despatx del Senyor"), mansio);
         gonzalo = new ServentGonzalo(mansio.obtenirZona("Cuina"));
+        mansio.afegirPersonatge(bestia);
+        mansio.afegirPersonatge(majordom);
+        mansio.afegirPersonatge(gonzalo);
 
         System.out.println();
         System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
@@ -70,50 +75,45 @@ public class Joc {
             String ordre = menu.llegirOrdre();
             if (ordre == null) continue;
 
-            String[] parts = menu.descomposarOrdre(ordre);
-            String verb = parts[0];
-            String objectiu = parts[1];
-            if (!parts[2].isEmpty()) {
-                objectiu = objectiu + " " + parts[2];
-            }
-
-            processarOrdre(verb, objectiu, menu);
-            if (estat) {
-                passarTorn();
-            }
+            processarOrdre(ordre);
         }
     }
 
-    private void processarOrdre(String verb, String objectiu, Menu menu) {
-        switch (verb) {
+    public void processarOrdre(String ordre) {
+        if (ordre == null || ordre.isBlank()) {
+            return;
+        }
+        String neta = ordre.trim().toLowerCase();
+        switch (neta) {
             case "sortir" -> {
                 System.out.println();
                 System.out.println("  Adeu! Gracies per jugar.");
                 estat = false;
+                return;
             }
-
-            case "ajuda", "ayuda" -> menu.mostrarInstruccions();
-
-            case "anar" -> moureDireccio(objectiu);
-
-            case "nord", "sud", "est", "oest", "amunt", "avall" -> moureDireccio(verb);
-            case "obrir" -> { if (!bloquejatPerFoscor()) obrirDireccio(objectiu); }
-            case "agafar" -> { if (!bloquejatPerFoscor()) agafarObjecte(objectiu); }
-            case "deixar" -> { if (!bloquejatPerFoscor()) deixarObjecte(objectiu); }
-            case "usar" -> { if (!bloquejatPerFoscor()) usarObjecte(objectiu); }
-            case "parlar" -> { if (!bloquejatPerFoscor()) parlarAmb(objectiu); }
-            case "encendre" -> encendreObjecte(objectiu);
-            case "apagar" -> apagarObjecte(objectiu);
+            case "ajuda", "ayuda" -> {
+                System.out.println();
+                System.out.println(Menu.obtenirInstruccions());
+                System.out.println();
+            }
             case "inventari" -> jugador.mostrarInventari();
             default -> {
-                System.out.println();
-                System.out.println("  No entenc aquesta ordre. Escriu 'ajuda' per veure les comandes disponibles.");
-                System.out.println();
+                Comanda comanda = interpretador.interpretar(neta);
+                if (comanda == null) {
+                    System.out.println();
+                    System.out.println("  No entenc aquesta ordre. Escriu 'ajuda' per veure les comandes disponibles.");
+                    System.out.println();
+                } else {
+                    comanda.executar(this);
+                }
             }
+        }
+        if (estat) {
+            passarTorn();
         }
     }
 
-    private void moureDireccio(String direccio) {
+    public void moure(String direccio) {
         if (direccio == null || direccio.isEmpty()) {
             System.out.println();
             System.out.println("  Cap a on vols anar? Escriu: ANAR [nord/sud/est/oest/amunt/avall]");
@@ -172,7 +172,10 @@ public class Joc {
         }
     }
 
-    private void obrirDireccio(String direccio) {
+    public void obrir(String direccio) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
         if (direccio == null || direccio.isEmpty()) {
             System.out.println();
             System.out.println("  Quina porta vols obrir? Escriu: OBRIR [nord/sud/est/oest/amunt/avall]");
@@ -220,6 +223,38 @@ public class Joc {
         System.out.println();
     }
 
+    public void tancar(String direccio) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
+        if (direccio == null || direccio.isEmpty()) {
+            System.out.println();
+            System.out.println("  Quina porta vols tancar? Escriu: TANCAR [nord/sud/est/oest/amunt/avall]");
+            System.out.println();
+            return;
+        }
+
+        Porta porta = zonaActual.buscarPortaPerDireccio(direccio);
+        if (porta == null) {
+            System.out.println();
+            System.out.println("  No hi ha cap porta cap al " + direccio + ".");
+            System.out.println();
+            return;
+        }
+
+        if (!porta.isOberta()) {
+            System.out.println();
+            System.out.println("  La porta cap al " + direccio + " ja es tancada.");
+            System.out.println();
+            return;
+        }
+
+        porta.tancar();
+        System.out.println();
+        System.out.println("  Tanques la porta cap al " + direccio + ".");
+        System.out.println();
+    }
+
     private Objecte buscarZona(String nom) {
         if (nom == null || nom.isEmpty()) {
             return null;
@@ -237,7 +272,10 @@ public class Joc {
         return null;
     }
 
-    private void agafarObjecte(String nom) {
+    public void agafar(String nom) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
         if (nom == null || nom.isEmpty()) {
             System.out.println();
             System.out.println("  Que vols agafar? Escriu: AGAFAR [objecte]");
@@ -267,7 +305,10 @@ public class Joc {
         System.out.println();
     }
 
-    private void deixarObjecte(String nom) {
+    public void deixar(String nom) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
         if (nom == null || nom.isEmpty()) {
             System.out.println();
             System.out.println("  Que vols deixar? Escriu: DEIXAR [objecte]");
@@ -290,7 +331,10 @@ public class Joc {
         System.out.println();
     }
 
-    private void usarObjecte(String nom) {
+    public void usar(String nom) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
         if (nom == null || nom.isEmpty()) {
             System.out.println();
             System.out.println("  Que vols usar? Escriu: USAR [objecte]");
@@ -391,7 +435,7 @@ public class Joc {
         return null;
     }
 
-    private void encendreObjecte(String nom) {
+    public void encendre(String nom) {
         if (nom == null || nom.isEmpty()) {
             System.out.println();
             System.out.println("  Què vols encendre? Escriu: ENCENDRE [objecte]");
@@ -422,7 +466,7 @@ public class Joc {
         }
     }
 
-    private void apagarObjecte(String nom) {
+    public void apagar(String nom) {
         if (nom == null || nom.isEmpty()) {
             System.out.println();
             System.out.println("  Què vols apagar? Escriu: APAGAR [objecte]");
@@ -453,7 +497,10 @@ public class Joc {
         }
     }
 
-    private void parlarAmb(String objectiu) {
+    public void parlar(String objectiu) {
+        if (bloquejatPerFoscor()) {
+            return;
+        }
         if (majordom != null && zonaActual == majordom.getZonaActual()) {
             String text = objectiu == null ? "" : objectiu.toLowerCase();
             String resposta;
