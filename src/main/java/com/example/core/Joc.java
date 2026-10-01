@@ -69,6 +69,8 @@ public class Joc {
         System.out.println("  INICIANT PARTIDA...");
         System.out.println();
         System.out.println(HISTORIA);
+        System.out.println();
+        System.out.println("  Tens 20 torns abans que la caldera exploti. Afanya't!");
 
         this.jugador = new Jugador("Jugador");
         this.mansio = new Mansio();
@@ -194,6 +196,13 @@ public class Joc {
             jugador.moure(desti);
             System.out.println();
             System.out.println(desti.mostrarDescripcio(!estaAFosques()));
+            if (desti.getNom().equals("Celler de la Caldera") && !jugador.isAbricPosat()) {
+                System.out.println();
+                System.out.println("  El vapor roent de la caldera et crema viu. Sense l'AbricDeProteccio no tenies cap oportunitat. Has perdut.");
+                System.out.println();
+                estat = false;
+                return;
+            }
             if (!estaAFosques()) {
                 comprovarBestia();
                 comprovarGonzalo();
@@ -601,6 +610,32 @@ public class Joc {
         tornGonzalo();
         tornBestia();
         jugador.decrementarEnverinament();
+        if (jugador.haMortEnverinat()) {
+            System.out.println();
+            System.out.println("  El verí t'ha matat. Has perdut.");
+            System.out.println();
+            estat = false;
+            return;
+        }
+        tornsCaldera--;
+        if (tornsCaldera <= 0) {
+            System.out.println();
+            System.out.println("  La Caldera de Vapor ha explotat i s'ha emportat la mansió pels aires. Has perdut.");
+            System.out.println();
+            estat = false;
+        } else if (tornsCaldera == 10) {
+            System.out.println();
+            System.out.println("  La caldera xiula cada cop més fort... queden 10 torns!");
+            System.out.println();
+        } else if (tornsCaldera == 5) {
+            System.out.println();
+            System.out.println("  Les juntes de la caldera cedeixen... queden 5 torns!");
+            System.out.println();
+        } else if (tornsCaldera <= 3) {
+            System.out.println();
+            System.out.println("  La caldera està a punt d'explotar... queden " + tornsCaldera + " torns!");
+            System.out.println();
+        }
     }
 
     private void tornGonzalo() {
@@ -677,6 +712,10 @@ public class Joc {
 
     public Zona getZonaActual() {
         return zonaActual;
+    }
+
+    public int getTornsCaldera() {
+        return tornsCaldera;
     }
 
     public Bestia getBestia() {
