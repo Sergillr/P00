@@ -32,6 +32,10 @@ public class Porta {
         return direccio;
     }
 
+    public String getNom() {
+        return direccio;
+    }
+
     public Zona getZonaOrigen() {
         return zonaOrigen;
     }

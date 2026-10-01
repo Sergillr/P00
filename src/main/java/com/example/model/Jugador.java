@@ -83,7 +83,7 @@ public class Jugador {
 
     public void usar(Objecte objecte) {
         if (objecte != null) {
-            objecte.usar(this);
+            objecte.usar(this, null);
         }
     }
 
@@ -102,13 +102,13 @@ public class Jugador {
             return;
         }
         comptadorEnverinament--;
-        if (comptadorEnverinament <= 0) {
-            enverinat = false;
-            comptadorEnverinament = 0;
-            System.out.println();
-            System.out.println("  L'efecte de la substància passa. Ja no estàs enverinat.");
-            System.out.println();
+        if (comptadorEnverinament > 0) {
+            System.out.println("  El verí corre per les teves venes... et queden " + comptadorEnverinament + " torns.");
         }
+    }
+
+    public boolean haMortEnverinat() {
+        return enverinat && comptadorEnverinament <= 0;
     }
 
     public void mostrarInventari() {

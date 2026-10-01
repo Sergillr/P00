@@ -10,7 +10,7 @@ public class Main {
 
     public static void startGame() {
         Menu menu = new Menu();
-        Joc joc = new Joc();
+        Joc joc = new Joc(menu);
 
         boolean executant = true;
 
@@ -20,7 +20,7 @@ public class Main {
             switch (opcio) {
                 case 1 -> {
                     joc.iniciarPartida();
-                    joc.executarPartida(menu);
+                    joc.executarPartida();
                 }
                 case 2 -> menu.mostrarInstruccions();
                 case 3 -> menu.mostrarCredits();

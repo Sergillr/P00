@@ -46,7 +46,7 @@ public class MovimentTest {
     @Test
     public void testAfegirObjecteAZona() {
         Zona zona = new Zona("Sala", "Una sala gran");
-        Objecte obj = new Objecte("Taula", "Una taula de fusta", false);
+        Objecte obj = new Objecte("Taula", "Una taula de fusta", false) { };
         zona.afegirObjecte(obj);
         assertEquals(1, zona.getObjectes().size());
         assertEquals("Taula", zona.getObjectes().get(0).getNom());
@@ -55,7 +55,7 @@ public class MovimentTest {
     @Test
     public void testEliminarObjecteDeZona() {
         Zona zona = new Zona("Sala", "Una sala gran");
-        Objecte obj = new Objecte("Taula", "Una taula de fusta", false);
+        Objecte obj = new Objecte("Taula", "Una taula de fusta", false) { };
         zona.afegirObjecte(obj);
         zona.eliminarObjecte(obj);
         assertTrue(zona.getObjectes().isEmpty());
@@ -64,7 +64,7 @@ public class MovimentTest {
     @Test
     public void testBuscarObjecteAZona() {
         Zona zona = new Zona("Sala", "Una sala gran");
-        Objecte obj = new Objecte("Taula", "Una taula de fusta", false);
+        Objecte obj = new Objecte("Taula", "Una taula de fusta", false) { };
         zona.afegirObjecte(obj);
         assertEquals(obj, zona.buscarObjecte("taula"));
         assertNull(zona.buscarObjecte("cadi"));
@@ -94,7 +94,7 @@ public class MovimentTest {
     @Test
     public void testMostrarDescripcioAmbObjectes() {
         Zona zona = new Zona("Sala", "Una sala gran");
-        Objecte obj = new Objecte("Taula", "Una taula de fusta", false);
+        Objecte obj = new Objecte("Taula", "Una taula de fusta", false) { };
         zona.afegirObjecte(obj);
         String desc = zona.mostrarDescripcio();
         assertTrue(desc.contains("Taula"));
@@ -299,7 +299,7 @@ public class MovimentTest {
     @Test
     public void testJugadorAgafarObjecte() {
         Zona zona = mansio.obtenirZona("Dormitori Principal");
-        Objecte obj = new Objecte("Llanterna", "Una llanterna vella", true);
+        Objecte obj = new Objecte("Llanterna", "Una llanterna vella", true) { };
         zona.afegirObjecte(obj);
 
         assertTrue(jugador.afegirInventari(obj));
@@ -309,7 +309,7 @@ public class MovimentTest {
     @Test
     public void testJugadorDeixarObjecte() {
         Zona zona = mansio.obtenirZona("Dormitori Principal");
-        Objecte obj = new Objecte("Llanterna", "Una llanterna vella", true);
+        Objecte obj = new Objecte("Llanterna", "Una llanterna vella", true) { };
         zona.afegirObjecte(obj);
         jugador.afegirInventari(obj);
 
@@ -360,7 +360,7 @@ public class MovimentTest {
     @Test
     public void testInventariDespresDagafar() {
         Zona zona = mansio.obtenirZona("Dormitori Principal");
-        Objecte obj = new Objecte("Clau", "Una clau vella", true);
+        Objecte obj = new Objecte("Clau", "Una clau vella", true) { };
         zona.afegirObjecte(obj);
 
         assertTrue(zona.getObjectes().contains(obj));

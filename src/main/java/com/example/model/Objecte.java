@@ -1,6 +1,6 @@
 package com.example.model;
 
-public class Objecte {
+public abstract class Objecte {
 
     private final String nom;
     private final String descripcio;
@@ -24,7 +24,7 @@ public class Objecte {
         return agafable;
     }
 
-    public void usar(Jugador jugador) {
+    public void usar(Jugador jugador, Objecte desti) {
         System.out.println("  No passa res amb " + nom + ".");
     }
 

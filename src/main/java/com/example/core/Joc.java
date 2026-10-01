@@ -19,6 +19,26 @@ import java.util.Random;
 
 public class Joc {
 
+    private static final String HISTORIA =
+            "  Hivern de 1885.\n"
+            + "\n"
+            + "  El senyor de la mansió s'ha despertat per un soroll ensordidor.\n"
+            + "  El seu majordom obre la porta amb una carta:\n"
+            + "\n"
+            + "  \"La Caldera de Vapor del celler ha patit una avaria crítica\n"
+            + "  i amenaça amb fer saltar pels aires tota la casa.\n"
+            + "  Intenteu de salvar la vostra pell y la del reste de habitants\n"
+            + "  de la mansio. I tingueu compta amb la bestia.\n"
+            + "\n"
+            + "  PD: No tracteu de fugir, me he assegurat de que no pugueu sortir.\n"
+            + "\n"
+            + "  Atentament,\n"
+            + "  -La bestia\"\n"
+            + "\n"
+            + "  Objectiu: Aconseguir la Clau Anglesa del taller, posar-se una manta\n"
+            + "  aïllant per protecció contra el vapor roent, reparar la caldera del\n"
+            + "  celler i tornar al Despatx Principal per estabilitzar el sistema.";
+
     private Jugador jugador;
     private Mansio mansio;
     private boolean estat;
@@ -28,25 +48,34 @@ public class Joc {
     private Majordom majordom;
     private ServentGonzalo gonzalo;
     private final Interpretador interpretador;
+    private final Menu menu;
+    private int tornsCaldera;
 
     public Joc() {
+        this(new Menu());
+    }
+
+    public Joc(Menu menu) {
         this.jugador = new Jugador("Jugador");
         this.mansio = new Mansio();
         this.estat = true;
         this.zonaActual = null;
         this.interpretador = new Interpretador();
+        this.menu = menu;
     }
 
     public void iniciarPartida() {
         System.out.println();
         System.out.println("  INICIANT PARTIDA...");
         System.out.println();
+        System.out.println(HISTORIA);
 
         this.jugador = new Jugador("Jugador");
         this.mansio = new Mansio();
         this.estat = true;
         this.zonaActual = null;
         this.zonaAnterior = null;
+        this.tornsCaldera = 20;
 
         mansio.inicialitzar();
 
@@ -70,7 +99,7 @@ public class Joc {
         System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
     }
 
-    public void executarPartida(Menu menu) {
+    public void executarPartida() {
         while (estat) {
             String ordre = menu.llegirOrdre();
             if (ordre == null) continue;
@@ -632,6 +661,7 @@ public class Joc {
         estat = true;
         zonaActual = null;
         zonaAnterior = null;
+        tornsCaldera = 20;
         bestia = null;
         majordom = null;
         gonzalo = null;
