@@ -1,6 +1,5 @@
 package com.example.model.personatges;
 
-import com.example.model.Jugador;
 import com.example.model.Personatge;
 import com.example.model.Porta;
 import com.example.model.Zona;
@@ -8,15 +7,27 @@ import com.example.model.objecte.GaletesDeTe;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class Bestia extends Personatge {
+public class ServentGonzalo extends Personatge {
 
-    private boolean distreta;
-    private int comptadorMoviment;
+    private boolean despert;
+    private boolean entretingut;
 
-    public Bestia(Zona zonaInicial) {
-        super("La Bèstia", zonaInicial);
-        this.distreta = false;
-        this.comptadorMoviment = 0;
+    public ServentGonzalo(Zona zonaInicial) {
+        super("Servent Gonzalo", zonaInicial);
+        this.despert = false;
+        this.entretingut = false;
+    }
+
+    public boolean isDespert() {
+        return despert;
+    }
+
+    public boolean isEntretingut() {
+        return entretingut;
+    }
+
+    public void despertar() {
+        despert = true;
     }
 
     public void moureAleatoriament() {
@@ -34,24 +45,21 @@ public class Bestia extends Personatge {
             return;
         }
         setZonaActual(obertes.get(new Random().nextInt(obertes.size())).getZonaDesti());
-        comptadorMoviment++;
     }
 
-    public void distreure(GaletesDeTe galetes) {
-        distreta = true;
+    public void menjarGaletes(GaletesDeTe galetes) {
+        entretingut = true;
     }
 
-    public boolean isDistreta() {
-        return distreta;
-    }
-
-    public void atacar(Jugador jugador) {
-        System.out.println("  La Bèstia t'ataca amb una xeringa!");
-        jugador.enverinar();
+    public void reposar() {
+        entretingut = false;
     }
 
     @Override
     public String parlar(String frase) {
-        return "Grrr...";
+        if (!despert) {
+            return "Zzz... (En Gonzalo dorm plàcidament.)";
+        }
+        return "Eh? Què...? Tu has vist les meves galetes? M'encanten els dolços!";
     }
 }

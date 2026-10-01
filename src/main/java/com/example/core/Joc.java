@@ -2,11 +2,14 @@ package com.example.core;
 
 import com.example.model.personatges.Bestia;
 import com.example.model.personatges.Majordom;
+import com.example.model.personatges.ServentGonzalo;
 import com.example.model.Jugador;
 import com.example.model.Mansio;
 import com.example.model.Objecte;
 import com.example.model.Porta;
 import com.example.model.Zona;
+import com.example.model.objecte.AbricDeProteccio;
+import com.example.model.objecte.ClauAnglesa;
 import com.example.model.objecte.ClauDeCoure;
 import com.example.model.objecte.GaletesDeTe;
 import com.example.model.objecte.LlanternaDeQuerosè;
@@ -23,6 +26,7 @@ public class Joc {
     private Zona zonaAnterior;
     private Bestia bestia;
     private Majordom majordom;
+    private ServentGonzalo gonzalo;
 
     public Joc() {
         this.jugador = new Jugador("Jugador");
@@ -55,6 +59,7 @@ public class Joc {
         }
         bestia = new Bestia(amagatalls.get(new Random().nextInt(amagatalls.size())));
         majordom = new Majordom(mansio.obtenirZona("Despatx del Senyor"), mansio);
+        gonzalo = new ServentGonzalo(mansio.obtenirZona("Cuina"));
 
         System.out.println();
         System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
@@ -73,6 +78,9 @@ public class Joc {
             }
 
             processarOrdre(verb, objectiu, menu);
+            if (estat) {
+                passarTorn();
+            }
         }
     }
 
@@ -154,11 +162,12 @@ public class Joc {
         if (desti != null) {
             zonaAnterior = zonaActual;
             zonaActual = desti;
-            jugador.setZonaActual(desti);
+            jugador.moure(desti);
             System.out.println();
             System.out.println(desti.mostrarDescripcio(!estaAFosques()));
             if (!estaAFosques()) {
                 comprovarBestia();
+                comprovarGonzalo();
             }
         }
     }
@@ -298,18 +307,28 @@ public class Joc {
         }
 
         if (obj instanceof GaletesDeTe galetes) {
-            if (bestia != null && zonaActual == bestia.getZonaActual()) {
-                if (bestia.isDistreta()) {
-                    System.out.println();
-                    System.out.println("  La Bèstia ja està distreta amb les galetes.");
-                    System.out.println();
-                } else {
-                    galetes.usar(bestia);
-                    bestia.distreure(galetes);
-                    jugador.deixar(obj);
-                    System.out.println("  La Bèstia es distreu menjant les galetes. Pots passar sense perill... de moment.");
-                    System.out.println();
-                }
+            boolean bestiaAqui = bestia != null && zonaActual == bestia.getZonaActual();
+            boolean gonzaloAqui = gonzalo != null && zonaActual == gonzalo.getZonaActual();
+            if (bestiaAqui && !bestia.isDistreta()) {
+                galetes.usar(bestia);
+                bestia.distreure(galetes);
+                jugador.deixar(obj);
+                System.out.println("  La Bèstia es distreu menjant les galetes. Pots passar sense perill... de moment.");
+                System.out.println();
+            } else if (gonzaloAqui && gonzalo.isDespert()) {
+                gonzalo.menjarGaletes(galetes);
+                jugador.deixar(obj);
+                System.out.println();
+                System.out.println("  En Gonzalo es menja les galetes, entretingut. De moment no rondarà.");
+                System.out.println();
+            } else if (bestiaAqui) {
+                System.out.println();
+                System.out.println("  La Bèstia ja està distreta amb les galetes.");
+                System.out.println();
+            } else if (gonzaloAqui) {
+                System.out.println();
+                System.out.println("  En Gonzalo dorm plàcidament. No et fa cas.");
+                System.out.println();
             } else {
                 System.out.println();
                 System.out.println("  Ofereixes les galetes... però aquí no hi ha ningú.");
@@ -318,7 +337,23 @@ public class Joc {
             return;
         }
 
-        obj.usar(jugador);
+        if (obj instanceof AbricDeProteccio abric) {
+            if (jugador.isAbricPosat()) {
+                abric.treure(jugador);
+            } else {
+                abric.posar(jugador);
+            }
+            return;
+        }
+
+        if (obj instanceof ClauAnglesa clau) {
+            if (bestia != null && zonaActual == bestia.getZonaActual() && !bestia.isDistreta()) {
+                clau.usarContraBestia(bestia, jugador);
+                return;
+            }
+        }
+
+        jugador.usar(obj);
     }
 
     private boolean estaAFosques() {
@@ -419,22 +454,36 @@ public class Joc {
     }
 
     private void parlarAmb(String objectiu) {
-        if (majordom == null || zonaActual != majordom.getZonaActual()) {
+        if (majordom != null && zonaActual == majordom.getZonaActual()) {
+            String text = objectiu == null ? "" : objectiu.toLowerCase();
+            String resposta;
+            if (text.contains("bestia") || text.contains("bèstia")) {
+                resposta = majordom.dirUbicacioBestia(bestia);
+            } else {
+                resposta = majordom.parlar(objectiu);
+            }
             System.out.println();
-            System.out.println("  Aquí no hi ha ningú amb qui parlar.");
+            System.out.println("  " + resposta);
             System.out.println();
             return;
         }
 
-        String text = objectiu == null ? "" : objectiu.toLowerCase();
-        String resposta;
-        if (text.contains("bestia") || text.contains("bèstia")) {
-            resposta = majordom.dirUbicacioBestia(bestia);
-        } else {
-            resposta = majordom.parlar(objectiu);
+        if (gonzalo != null && zonaActual == gonzalo.getZonaActual()) {
+            System.out.println();
+            System.out.println("  En Gonzalo diu: \"" + gonzalo.parlar(objectiu) + "\"");
+            System.out.println();
+            return;
         }
+
+        if (bestia != null && zonaActual == bestia.getZonaActual()) {
+            System.out.println();
+            System.out.println("  La Bèstia no parla, només grunyeix: \"" + bestia.parlar(objectiu) + "\"");
+            System.out.println();
+            return;
+        }
+
         System.out.println();
-        System.out.println("  " + resposta);
+        System.out.println("  Aquí no hi ha ningú amb qui parlar.");
         System.out.println();
     }
 
@@ -443,13 +492,87 @@ public class Joc {
             return;
         }
         System.out.println();
+        if (bestia.isDistreta()) {
+            System.out.println("  La Bèstia continua distreta amb les galetes.");
+            System.out.println();
+            return;
+        }
         System.out.println("  La Bèstia és aquí, amagada entre les ombres!");
+        bestia.atacar(jugador);
         if (jugador.getInventari().conte("GaletesDeTe")) {
             System.out.println("  Portes GaletesDeTe a sobre. Pots distreure-la oferint-li galetes: USAR GALETESDETE");
         } else {
             System.out.println("  No portes res per distreure-la... Millor no atacar-la directament.");
         }
         System.out.println();
+    }
+
+    private void comprovarGonzalo() {
+        if (gonzalo == null || zonaActual != gonzalo.getZonaActual()) {
+            return;
+        }
+        System.out.println();
+        if (!gonzalo.isDespert()) {
+            gonzalo.despertar();
+            System.out.println("  En Gonzalo es desperta sobresaltat! A partir d'ara voltarà per la mansió buscant dolços.");
+        } else {
+            System.out.println("  En Gonzalo és aquí, despistat.");
+        }
+        System.out.println();
+    }
+
+    private void passarTorn() {
+        tornGonzalo();
+        tornBestia();
+        jugador.decrementarEnverinament();
+    }
+
+    private void tornGonzalo() {
+        if (gonzalo == null || !gonzalo.isDespert()) {
+            return;
+        }
+        Zona zg = gonzalo.getZonaActual();
+        if (zg == null) {
+            return;
+        }
+        GaletesDeTe dolc = null;
+        for (Objecte o : zg.getObjectes()) {
+            if (o instanceof GaletesDeTe g) {
+                dolc = g;
+                break;
+            }
+        }
+        if (dolc != null) {
+            zg.eliminarObjecte(dolc);
+            gonzalo.menjarGaletes(dolc);
+            if (zg == zonaActual && !estaAFosques()) {
+                System.out.println();
+                System.out.println("  En Gonzalo es menja les GaletesDeTe que troba. Es queda entretingut.");
+                System.out.println();
+            }
+            return;
+        }
+        if (gonzalo.isEntretingut()) {
+            gonzalo.reposar();
+            return;
+        }
+        Zona abans = zg;
+        gonzalo.moureAleatoriament();
+        if (gonzalo.getZonaActual() != abans && gonzalo.getZonaActual() == zonaActual && !estaAFosques()) {
+            System.out.println();
+            System.out.println("  En Gonzalo entra voltant, despistat.");
+            System.out.println();
+        }
+    }
+
+    private void tornBestia() {
+        if (bestia == null || bestia.isDistreta()) {
+            return;
+        }
+        bestia.moureAleatoriament();
+        if (bestia.getZonaActual() == zonaActual && !estaAFosques()) {
+            bestia.atacar(jugador);
+        }
     }
 
     public boolean comprovarFinal() {
@@ -462,6 +585,9 @@ public class Joc {
         estat = true;
         zonaActual = null;
         zonaAnterior = null;
+        bestia = null;
+        majordom = null;
+        gonzalo = null;
     }
 
     public Jugador getJugador() {
@@ -482,5 +608,9 @@ public class Joc {
 
     public Majordom getMajordom() {
         return majordom;
+    }
+
+    public ServentGonzalo getGonzalo() {
+        return gonzalo;
     }
 }

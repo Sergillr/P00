@@ -18,5 +18,6 @@ public class ClauAnglesa extends Objecte {
 
     public void usarContraBestia(Bestia bestia, Jugador jugador) {
         System.out.println("  Ataques la Bestia amb la ClauAnglesa. Et clava una xeringa: t'ha enverinat!");
+        jugador.enverinar();
     }
 }

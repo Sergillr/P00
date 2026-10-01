@@ -6,12 +6,18 @@ public class Jugador {
     private Zona zonaActual;
     private final Inventari inventari;
     private boolean abricPosat;
+    private int moviments;
+    private boolean enverinat;
+    private int comptadorEnverinament;
 
     public Jugador(String nom) {
         this.nom = nom;
         this.zonaActual = null;
         this.inventari = new Inventari();
         this.abricPosat = false;
+        this.moviments = 0;
+        this.enverinat = false;
+        this.comptadorEnverinament = 0;
     }
 
     public String getNom() {
@@ -24,6 +30,15 @@ public class Jugador {
 
     public void setZonaActual(Zona zona) {
         this.zonaActual = zona;
+    }
+
+    public void moure(Zona zona) {
+        this.zonaActual = zona;
+        this.moviments++;
+    }
+
+    public int getMoviments() {
+        return moviments;
     }
 
     public Inventari getInventari() {
@@ -64,6 +79,36 @@ public class Jugador {
 
     public void treureAbric() {
         abricPosat = false;
+    }
+
+    public void usar(Objecte objecte) {
+        if (objecte != null) {
+            objecte.usar(this);
+        }
+    }
+
+    public boolean isEnverinat() {
+        return enverinat;
+    }
+
+    public void enverinar() {
+        enverinat = true;
+        comptadorEnverinament = 3;
+        System.out.println("  T'ha injectat una estranya substància: estàs enverinat!");
+    }
+
+    public void decrementarEnverinament() {
+        if (!enverinat) {
+            return;
+        }
+        comptadorEnverinament--;
+        if (comptadorEnverinament <= 0) {
+            enverinat = false;
+            comptadorEnverinament = 0;
+            System.out.println();
+            System.out.println("  L'efecte de la substància passa. Ja no estàs enverinat.");
+            System.out.println();
+        }
     }
 
     public void mostrarInventari() {
