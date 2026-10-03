@@ -93,7 +93,7 @@ public class Jugador {
 
     public void enverinar() {
         enverinat = true;
-        comptadorEnverinament = 3;
+        comptadorEnverinament = 11;
         System.out.println("  T'ha injectat una estranya substància: estàs enverinat!");
     }
 

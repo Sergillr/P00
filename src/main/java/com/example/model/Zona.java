@@ -74,15 +74,15 @@ public class Zona {
 
     public String mostrarDescripcio(boolean hiVeus) {
         StringBuilder sb = new StringBuilder();
-        sb.append(nom).append("\n");
+        sb.append(nom).append("\n\n");
 
         if (fosca && !hiVeus) {
             sb.append("   [FOSC] Es completament fosc. No veus res.\n");
         } else {
-            sb.append("   ").append(descripcio).append("\n");
+            sb.append("   ").append(descripcio.replace("\n", "\n   ").replace("\n   \n", "\n\n")).append("\n");
 
             if (!objectes.isEmpty()) {
-                sb.append("   Objectes: ");
+                sb.append("\n   Objectes: ");
                 for (int i = 0; i < objectes.size(); i++) {
                     if (i > 0) sb.append(", ");
                     sb.append(objectes.get(i).getNom());
@@ -92,7 +92,7 @@ public class Zona {
         }
 
         if (!sortides.isEmpty()) {
-            sb.append("   Sortides: ");
+            sb.append("\n   Sortides: ");
             for (int i = 0; i < sortides.size(); i++) {
                 if (i > 0) sb.append(", ");
                 Porta p = sortides.get(i);

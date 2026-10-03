@@ -11,6 +11,8 @@ import com.example.model.objecte.LlanternaDeQuerosè;
 
 public class Mansio {
 
+    private static final Random ALEATORI = new Random();
+
     private final ArrayList<Zona> zones;
     private final ArrayList<Porta> portes;
     private final ArrayList<Personatge> personatges;
@@ -57,32 +59,32 @@ public class Mansio {
     public void inicialitzar() {
         // Crear les zones de la mansió
         Zona dormitori = new Zona("Dormitori Principal",
-                "Un dormitori ampli amb un llit de dosser i cortines de vellut vermell. La tempesta esgarrapa els vidres de la finestra. Al sud, una porta de fusta baixa al Despatx del Senyor.");
+                "Un dormitori ampli amb un llit de dosser i cortines de vellut vermell. La tempesta esgarrapa els vidres de la finestra.\n\nAl sud, una porta de fusta baixa al Despatx del Senyor.");
 
         Zona despatx = new Zona("Despatx del Senyor",
-                "El cor administratiu de la mansió, amb prestatgeries de caoba i un gran escriptori. Al nord el Dormitori Principal, a l'oest el Vestuari i Armeria, a l'est els Banys de Teula i al sud el Gran Menjador.");
+                "El cor administratiu de la mansió, amb prestatgeries de caoba i un gran escriptori.\n\nAl nord el Dormitori Principal, a l'oest el Vestuari i Armeria, a l'est els Banys de Teula i al sud el Gran Menjador.");
 
         Zona vestidor = new Zona("Vestuari i Armeria",
-                "Una sala petita on es guarden els vestits de gala, abrics d'hivern i eines de caça. L'olor de cuir i cera omple l'aire. A l'est, una porta torna al Despatx del Senyor.");
+                "Una sala petita on es guarden els vestits de gala, abrics d'hivern i eines de caça. L'olor de cuir i cera omple l'aire.\n\nA l'est, una porta torna al Despatx del Senyor.");
 
         Zona bany = new Zona("Bany",
-                "Una habitació revestida de teules blanques amb una banyera de ferro fosa amb potes de lleó i canonades de coure que vibren per la pressió de vapor. A l'oest, una porta torna al Despatx del Senyor.");
+                "Una habitació revestida de teules blanques amb una banyera de ferro fosa amb potes de lleó i canonades de coure que vibren per la pressió de vapor.\n\nA l'oest, una porta torna al Despatx del Senyor.");
 
         Zona menjador = new Zona("Menjador",
-                "Una gran taula de roure presideix la sala, apta per a dotze comensals. Un canelobre de cristall penja del sostre il·luminant feblement l'habitació. Al nord el Despatx del Senyor, a l'oest la Cuina, al sud el Saló de Recepció i a l'est el Taller de Mecànica.");
+                "Una gran taula de roure presideix la sala, apta per a dotze comensals. Un canelobre de cristall penja del sostre il·luminant feblement l'habitació.\n\nAl nord el Despatx del Senyor, a l'oest la Cuina, al sud el Saló de Recepció i a l'est el Taller de Mecànica.");
 
         Zona cuina = new Zona("Cuina",
-                "La cuina de la casa, amb un fogó de carbó enorme. S'hi respira una olor dolça de rebosteria recent feta. A l'est, una porta torna al Gran Menjador.");
+                "La cuina de la casa, amb un fogó de carbó enorme. S'hi respira una olor dolça de rebosteria recent feta.\n\nA l'est, una porta torna al Gran Menjador.");
 
         Zona salo = new Zona("Saló de Recepció",
-                "Un ampli saló per rebre visites il·lustres. A un racó hi ha una porta de ferro pesada que dona accés als nivells inferiors de la mansió. Al nord, una porta torna al Gran Menjador. Avall, una porta de ferro baixa a l'Escala del Celler.");
+                "Un ampli saló per rebre visites il·lustres. A un racó hi ha una porta de ferro pesada que dona accés als nivells inferiors de la mansió.\n\nAl nord, una porta torna al Gran Menjador. Avall, una porta de ferro baixa a l'Escala del Celler.");
         Zona taller = new Zona("Taller de mecànica",
-                "Un taller ple de motlles, engranatges i eines de ferro. Està completament a les fosques perquè el llum de gas s'ha apagat. Necessitareu una font de llum per veure-hi. A l'oest, una porta torna al Gran Menjador.",
+                "Un taller ple de motlles, engranatges i eines de ferro. Està completament a les fosques perquè el llum de gas s'ha apagat. Necessitareu una font de llum per veure-hi.\n\nA l'oest, una porta torna al Gran Menjador.",
                 true);
         Zona escala = new Zona("Escala del Celler",
-                "Un passadís humit i estret de pedra amb una escala de cargol que baixa cap a les fondàries de la mansió. La calor augmenta a cada pas. Amunt, l'escala puja al Saló de Recepció i al sud baixa al Celler de la Caldera.");
+                "Un passadís humit i estret de pedra amb una escala de cargol que baixa cap a les fondàries de la mansió. La calor augmenta a cada pas.\n\nAmunt, l'escala puja al Saló de Recepció i al sud baixa al Celler de la Caldera.");
         Zona celler = new Zona("Celler de la Caldera",
-                "La sala de màquines subterrània. Una enorme caldera de vapor d'acer xiula amb violència, deixant anar xorolls de vapor roent per les juntes danyades. Al nord, el passadís torna a l'Escala del Celler.");
+                "La sala de màquines subterrània. Una enorme caldera de vapor d'acer xiula amb violència, deixant anar xorolls de vapor roent per les juntes danyades.\n\nAl nord, el passadís torna a l'Escala del Celler.");
         // Afegir les zones a la mansió
         afegirZona(dormitori);
         afegirZona(despatx);
@@ -170,6 +172,6 @@ public class Mansio {
                 candidates.add(zona);
             }
         }
-        candidates.get(new Random().nextInt(candidates.size())).afegirObjecte(new LlanternaDeQuerosè());
+        candidates.get(ALEATORI.nextInt(candidates.size())).afegirObjecte(new LlanternaDeQuerosè());
     }
 }

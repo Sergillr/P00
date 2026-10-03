@@ -29,22 +29,23 @@ public class Menu {
     }
 
     public static String obtenirInstruccions() {
-        return "INSTRUCCIONS\n"
-                + "\n"
-                + "COMANDES DISPONIBLES:\n"
-                + "\n"
-                + "  ANAR [nord/sud/est/oest/amunt/avall] - Desplacar-te en una direcció\n"
-                + "  AGAFAR [objecte]     - Agafar un objecte\n"
-                + "  DEIXAR [objecte]     - Deixar un objecte a terra\n"
-                + "  ENCENDRE [objecte]   - Encendre un objecte\n"
-                + "  APAGAR [objecte]     - Apagar un objecte\n"
-                + "  OBRIR [porta]        - Obrir una porta\n"
-                + "  TANCAR [porta]       - Tancar una porta\n"
-                + "  USAR [objecte]       - Usar un objecte\n"
-                + "  PARLAR [texte]       - Parlar amb algu\n"
-                + "  INVENTARI            - Veure els objectes que portes\n"
-                + "  AJUDA                - Mostrar les comandes\n"
-                + "  SORTIR               - Sortir del joc";
+        return """
+                INSTRUCCIONS
+
+                COMANDES DISPONIBLES:
+
+                  ANAR [nord/sud/est/oest/amunt/avall] - Desplacar-te en una direcció
+                  AGAFAR [objecte]     - Agafar un objecte
+                  DEIXAR [objecte]     - Deixar un objecte a terra
+                  ENCENDRE [objecte]   - Encendre un objecte
+                  APAGAR [objecte]     - Apagar un objecte
+                  OBRIR [porta]        - Obrir una porta
+                  TANCAR [porta]       - Tancar una porta
+                  USAR [objecte]       - Usar un objecte
+                  PARLAR [texte]       - Parlar amb algu
+                  INVENTARI            - Veure els objectes que portes
+                  AJUDA                - Mostrar les comandes
+                  SORTIR               - Sortir del joc""";
     }
 
     public void mostrarInstruccions() {
@@ -85,33 +86,6 @@ public class Menu {
             return null;
         }
         return linia.toLowerCase();
-    }
-
-    public String[] descomposarOrdre(String ordre) {
-        String verb = "";
-        String objectiu = "";
-        String parametre = "";
-
-        if (ordre == null || ordre.isEmpty()) {
-            return new String[] { verb, objectiu, parametre };
-        }
-
-        String[] parts = ordre.split("\\s+", 4);
-
-        if (parts.length >= 1) {
-            verb = parts[0];
-        }
-        if (parts.length >= 3) {
-            objectiu = parts[1];
-            parametre = parts[2];
-            if (parts.length == 4) {
-                parametre = parts[2] + " " + parts[3];
-            }
-        } else if (parts.length == 2) {
-            objectiu = parts[1];
-        }
-
-        return new String[] { verb, objectiu, parametre };
     }
 
     private int llegirOpcio(int min, int max) {

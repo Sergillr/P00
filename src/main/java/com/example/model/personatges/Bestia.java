@@ -10,6 +10,7 @@ import java.util.Random;
 
 public class Bestia extends Personatge {
 
+    private static final Random ALEATORI = new Random();
     private boolean distreta;
     private int comptadorMoviment;
 
@@ -33,7 +34,7 @@ public class Bestia extends Personatge {
         if (obertes.isEmpty()) {
             return;
         }
-        setZonaActual(obertes.get(new Random().nextInt(obertes.size())).getZonaDesti());
+        setZonaActual(obertes.get(ALEATORI.nextInt(obertes.size())).getZonaDesti());
         comptadorMoviment++;
     }
 

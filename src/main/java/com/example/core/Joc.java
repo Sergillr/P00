@@ -14,30 +14,28 @@ import com.example.model.objecte.ClauDeCoure;
 import com.example.model.objecte.GaletesDeTe;
 import com.example.model.objecte.LlanternaDeQuerosè;
 import com.example.ui.Menu;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.List;
 
 public class Joc {
 
-    private static final String HISTORIA =
-            "  Hivern de 1885.\n"
-            + "\n"
-            + "  El senyor de la mansió s'ha despertat per un soroll ensordidor.\n"
-            + "  El seu majordom obre la porta amb una carta:\n"
-            + "\n"
-            + "  \"La Caldera de Vapor del celler ha patit una avaria crítica\n"
-            + "  i amenaça amb fer saltar pels aires tota la casa.\n"
-            + "  Intenteu de salvar la vostra pell y la del reste de habitants\n"
-            + "  de la mansio. I tingueu compta amb la bestia.\n"
-            + "\n"
-            + "  PD: No tracteu de fugir, me he assegurat de que no pugueu sortir.\n"
-            + "\n"
-            + "  Atentament,\n"
-            + "  -La bestia\"\n"
-            + "\n"
-            + "  Objectiu: Aconseguir la Clau Anglesa del taller, posar-se una manta\n"
-            + "  aïllant per protecció contra el vapor roent, reparar la caldera del\n"
-            + "  celler i tornar al Despatx Principal per estabilitzar el sistema.";
+    private static final String HISTORIA = """
+        Hivern de 1885.
+
+        El senyor de la mansió s'ha despertat per un soroll ensordidor.
+        El seu majordom obre la porta amb una carta:
+
+        "La Caldera de Vapor del celler ha patit una avaria crítica
+        i amenaça amb fer saltar pels aires tota la casa.
+        Intenteu de salvar la vostra pell y la del reste de habitants
+        de la mansio. I tingueu compta amb la bestia.
+
+        PD: No tracteu de fugir, me he assegurat de que no pugueu sortir.
+
+        Atentament,
+        -La bestia\"""".replaceAll("(?m)^(?=\\S)", "  ");
 
     private Jugador jugador;
     private Mansio mansio;
@@ -50,6 +48,7 @@ public class Joc {
     private final Interpretador interpretador;
     private final Menu menu;
     private int tornsCaldera;
+    private boolean calderaReparada;
 
     public Joc() {
         this(new Menu());
@@ -65,9 +64,7 @@ public class Joc {
     }
 
     public void iniciarPartida() {
-        System.out.println();
-        System.out.println("  INICIANT PARTIDA...");
-        System.out.println();
+        mostrar("INICIANT PARTIDA...");
         System.out.println(HISTORIA);
         System.out.println();
         System.out.println("  Tens 20 torns abans que la caldera exploti. Afanya't!");
@@ -78,19 +75,14 @@ public class Joc {
         this.zonaActual = null;
         this.zonaAnterior = null;
         this.tornsCaldera = 20;
+        this.calderaReparada = false;
 
         mansio.inicialitzar();
 
         zonaActual = mansio.obtenirZona("Dormitori Principal");
         jugador.setZonaActual(zonaActual);
 
-        ArrayList<Zona> amagatalls = new ArrayList<>();
-        for (Zona zona : mansio.getZones()) {
-            if (!zona.getNom().equals("Dormitori Principal")) {
-                amagatalls.add(zona);
-            }
-        }
-        bestia = new Bestia(amagatalls.get(new Random().nextInt(amagatalls.size())));
+        bestia = new Bestia(zonaMesAllunyada(mansio.obtenirZona("Dormitori Principal")));
         majordom = new Majordom(mansio.obtenirZona("Despatx del Senyor"), mansio);
         gonzalo = new ServentGonzalo(mansio.obtenirZona("Cuina"));
         mansio.afegirPersonatge(bestia);
@@ -98,7 +90,30 @@ public class Joc {
         mansio.afegirPersonatge(gonzalo);
 
         System.out.println();
+        System.out.println();
         System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
+    }
+
+    private Zona zonaMesAllunyada(Zona origen) {
+        HashMap<Zona, Integer> distancia = new HashMap<>();
+        ArrayDeque<Zona> cua = new ArrayDeque<>();
+        distancia.put(origen, 0);
+        cua.add(origen);
+        Zona llunyana = origen;
+        while (!cua.isEmpty()) {
+            Zona actual = cua.poll();
+            for (Porta porta : actual.getSortides()) {
+                Zona seguent = porta.getZonaDesti();
+                if (!distancia.containsKey(seguent)) {
+                    distancia.put(seguent, distancia.get(actual) + 1);
+                    cua.add(seguent);
+                    if (distancia.get(seguent) > distancia.get(llunyana)) {
+                        llunyana = seguent;
+                    }
+                }
+            }
+        }
+        return llunyana;
     }
 
     public void executarPartida() {
@@ -122,70 +137,55 @@ public class Joc {
                 estat = false;
                 return;
             }
-            case "ajuda", "ayuda" -> {
-                System.out.println();
-                System.out.println(Menu.obtenirInstruccions());
-                System.out.println();
-            }
+            case "ajuda", "ayuda" -> mostrar(Menu.obtenirInstruccions());
             case "inventari" -> jugador.mostrarInventari();
             default -> {
                 Comanda comanda = interpretador.interpretar(neta);
                 if (comanda == null) {
-                    System.out.println();
-                    System.out.println("  No entenc aquesta ordre. Escriu 'ajuda' per veure les comandes disponibles.");
-                    System.out.println();
+                    mostrar("No entenc aquesta ordre. Escriu 'ajuda' per veure les comandes disponibles.");
                 } else {
                     comanda.executar(this);
+                    if (estat) {
+                        passarTorn();
+                    }
                 }
             }
-        }
-        if (estat) {
-            passarTorn();
         }
     }
 
     public void moure(String direccio) {
         if (direccio == null || direccio.isEmpty()) {
-            System.out.println();
-            System.out.println("  Cap a on vols anar? Escriu: ANAR [nord/sud/est/oest/amunt/avall]");
-            System.out.println();
+            mostrar("Cap a on vols anar? Escriu: ANAR [nord/sud/est/oest/amunt/avall]");
             return;
         }
 
         if (!direccio.equals("nord") && !direccio.equals("sud") &&
             !direccio.equals("est") && !direccio.equals("oest") &&
             !direccio.equals("amunt") && !direccio.equals("avall")) {
-            System.out.println();
-            System.out.println("  Direccio no valida. Utilitza: nord, sud, est, oest, amunt o avall.");
-            System.out.println();
+            mostrar("Direccio no valida. Utilitza: nord, sud, est, oest, amunt o avall.");
             return;
         }
 
         Porta porta = zonaActual.buscarPortaPerDireccio(direccio);
 
         if (porta == null) {
-            System.out.println();
-            System.out.println("  No hi ha cap sortida cap al " + direccio + ".");
-            System.out.println();
+            mostrar("No hi ha cap sortida cap al " + direccio + ".");
             return;
         }
 
         if (estaAFosques() && (zonaAnterior == null || porta.getZonaDesti() != zonaAnterior)) {
-            System.out.println();
-            System.out.println("  És massa fosc, no veus on vas. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
-            System.out.println();
+            mostrar("És massa fosc, no veus on vas. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
             return;
         }
 
         if (!porta.isOberta()) {
-            System.out.println();
-            System.out.println("  La porta que porta cap a " + porta.getZonaDesti().getNom() + " es tancada.");
             if (porta.isRequereixClau()) {
-                System.out.println("  Necessites una clau per obrir-la.");
+                mostrar("La porta que porta cap a " + porta.getZonaDesti().getNom() + " es tancada.",
+                        "Necessites una clau per obrir-la.");
             } else {
-                System.out.println("  Prova amb: OBRIR " + direccio);
+                mostrar("La porta que porta cap a " + porta.getZonaDesti().getNom() + " es tancada.",
+                        "Prova amb: OBRIR " + direccio);
             }
-            System.out.println();
             return;
         }
 
@@ -195,11 +195,20 @@ public class Joc {
             zonaActual = desti;
             jugador.moure(desti);
             System.out.println();
+            System.out.println();
             System.out.println(desti.mostrarDescripcio(!estaAFosques()));
             if (desti.getNom().equals("Celler de la Caldera") && !jugador.isAbricPosat()) {
-                System.out.println();
-                System.out.println("  El vapor roent de la caldera et crema viu. Sense l'AbricDeProteccio no tenies cap oportunitat. Has perdut.");
-                System.out.println();
+                mostrar("El vapor roent de la caldera et crema viu. Sense l'AbricDeProteccio no tenies cap oportunitat. Has perdut.");
+                estat = false;
+                return;
+            }
+            if (desti.getNom().equals("Despatx del Senyor") && calderaReparada) {
+                mostrar("Sobre l'escriptori trobes una carta amb una lletra estranya i tremolosa:",
+                        "\"M'he divertit molt amb aquest experiment i n'he après molt.\"",
+                        "\"Però ara me n'he d'anar. La caldera ja és estable i queda en les vostres mans.\"",
+                        "\"Fins a la propera tempesta.\"",
+                        "-La bestia");
+                mostrar("HAS ESTABILITZAT EL SISTEMA. HAS GUANYAT!");
                 estat = false;
                 return;
             }
@@ -215,50 +224,36 @@ public class Joc {
             return;
         }
         if (direccio == null || direccio.isEmpty()) {
-            System.out.println();
-            System.out.println("  Quina porta vols obrir? Escriu: OBRIR [nord/sud/est/oest/amunt/avall]");
-            System.out.println();
+            mostrar("Quina porta vols obrir? Escriu: OBRIR [nord/sud/est/oest/amunt/avall]");
             return;
         }
 
         Porta porta = zonaActual.buscarPortaPerDireccio(direccio);
         if (porta == null) {
-            System.out.println();
-            System.out.println("  No hi ha cap porta cap al " + direccio + ".");
-            System.out.println();
+            mostrar("No hi ha cap porta cap al " + direccio + ".");
             return;
         }
 
         if (porta.isOberta()) {
-            System.out.println();
-            System.out.println("  La porta cap al " + direccio + " ja es oberta.");
-            System.out.println();
+            mostrar("La porta cap al " + direccio + " ja es oberta.");
             return;
         }
 
         if (porta.isRequereixClau()) {
             Objecte obj = jugador.getInventari().obtenir("ClauDeCoure");
             if (obj instanceof ClauDeCoure clau && porta.obrir(clau)) {
-                System.out.println();
-                System.out.println("  Obres la porta cap al " + direccio + " amb la ClauDeCoure.");
-                System.out.println();
+                mostrar("Obres la porta cap al " + direccio + " amb la ClauDeCoure.");
             } else if (majordom != null && zonaActual == majordom.getZonaActual()
                     && majordom.obrirPorta(porta)) {
-                System.out.println();
-                System.out.println("  El Majordom t'obre la porta cap al " + direccio + ".");
-                System.out.println();
+                mostrar("El Majordom t'obre la porta cap al " + direccio + ".");
             } else {
-                System.out.println();
-                System.out.println("  La porta cap al " + direccio + " necessita la ClauDeCoure (o l'ajut del Majordom).");
-                System.out.println();
+                mostrar("La porta cap al " + direccio + " necessita la ClauDeCoure (o l'ajut del Majordom).");
             }
             return;
         }
 
         porta.obrir();
-        System.out.println();
-        System.out.println("  Obres la porta cap al " + direccio + ".");
-        System.out.println();
+        mostrar("Obres la porta cap al " + direccio + ".");
     }
 
     public void tancar(String direccio) {
@@ -266,43 +261,44 @@ public class Joc {
             return;
         }
         if (direccio == null || direccio.isEmpty()) {
-            System.out.println();
-            System.out.println("  Quina porta vols tancar? Escriu: TANCAR [nord/sud/est/oest/amunt/avall]");
-            System.out.println();
+            mostrar("Quina porta vols tancar? Escriu: TANCAR [nord/sud/est/oest/amunt/avall]");
             return;
         }
 
         Porta porta = zonaActual.buscarPortaPerDireccio(direccio);
         if (porta == null) {
-            System.out.println();
-            System.out.println("  No hi ha cap porta cap al " + direccio + ".");
-            System.out.println();
+            mostrar("No hi ha cap porta cap al " + direccio + ".");
             return;
         }
 
         if (!porta.isOberta()) {
-            System.out.println();
-            System.out.println("  La porta cap al " + direccio + " ja es tancada.");
-            System.out.println();
+            mostrar("La porta cap al " + direccio + " ja es tancada.");
             return;
         }
 
         porta.tancar();
+        mostrar("Tanques la porta cap al " + direccio + ".");
+    }
+
+    private static void mostrar(String... linies) {
         System.out.println();
-        System.out.println("  Tanques la porta cap al " + direccio + ".");
+        for (String linia : linies) {
+            System.out.println("  " + linia);
+        }
         System.out.println();
     }
 
-    private Objecte buscarZona(String nom) {
+    private static Objecte buscarPerNom(List<Objecte> objectes, String nom) {
         if (nom == null || nom.isEmpty()) {
             return null;
         }
-        Objecte exacte = zonaActual.buscarObjecte(nom);
-        if (exacte != null) {
-            return exacte;
+        for (Objecte obj : objectes) {
+            if (obj.getNom().equalsIgnoreCase(nom)) {
+                return obj;
+            }
         }
         String clau = nom.toLowerCase();
-        for (Objecte obj : zonaActual.getObjectes()) {
+        for (Objecte obj : objectes) {
             if (obj.getNom().toLowerCase().contains(clau)) {
                 return obj;
             }
@@ -310,37 +306,33 @@ public class Joc {
         return null;
     }
 
+    private Objecte buscarZona(String nom) {
+        return buscarPerNom(zonaActual.getObjectes(), nom);
+    }
+
     public void agafar(String nom) {
         if (bloquejatPerFoscor()) {
             return;
         }
         if (nom == null || nom.isEmpty()) {
-            System.out.println();
-            System.out.println("  Que vols agafar? Escriu: AGAFAR [objecte]");
-            System.out.println();
+            mostrar("Que vols agafar? Escriu: AGAFAR [objecte]");
             return;
         }
 
         Objecte obj = buscarZona(nom);
         if (obj == null) {
-            System.out.println();
-            System.out.println("  No hi ha cap '" + nom + "' aqui.");
-            System.out.println();
+            mostrar("No hi ha cap '" + nom + "' aqui.");
             return;
         }
 
         if (!obj.isAgafable()) {
-            System.out.println();
-            System.out.println("  No pots agafar " + obj.getNom() + ".");
-            System.out.println();
+            mostrar("No pots agafar " + obj.getNom() + ".");
             return;
         }
 
         zonaActual.eliminarObjecte(obj);
         jugador.agafar(obj);
-        System.out.println();
-        System.out.println("  Has agafat " + obj.getNom() + ".");
-        System.out.println();
+        mostrar("Has agafat " + obj.getNom() + ".");
     }
 
     public void deixar(String nom) {
@@ -348,25 +340,19 @@ public class Joc {
             return;
         }
         if (nom == null || nom.isEmpty()) {
-            System.out.println();
-            System.out.println("  Que vols deixar? Escriu: DEIXAR [objecte]");
-            System.out.println();
+            mostrar("Que vols deixar? Escriu: DEIXAR [objecte]");
             return;
         }
 
         Objecte obj = buscarInventari(nom);
         if (obj == null) {
-            System.out.println();
-            System.out.println("  No portes cap '" + nom + "' a sobre.");
-            System.out.println();
+            mostrar("No portes cap '" + nom + "' a sobre.");
             return;
         }
 
         jugador.deixar(obj);
         zonaActual.afegirObjecte(obj);
-        System.out.println();
-        System.out.println("  Has deixat " + obj.getNom() + ".");
-        System.out.println();
+        mostrar("Has deixat " + obj.getNom() + ".");
     }
 
     public void usar(String nom) {
@@ -374,17 +360,13 @@ public class Joc {
             return;
         }
         if (nom == null || nom.isEmpty()) {
-            System.out.println();
-            System.out.println("  Que vols usar? Escriu: USAR [objecte]");
-            System.out.println();
+            mostrar("Que vols usar? Escriu: USAR [objecte]");
             return;
         }
 
         Objecte obj = buscarInventari(nom);
         if (obj == null) {
-            System.out.println();
-            System.out.println("  No portes cap '" + nom + "' a sobre.");
-            System.out.println();
+            mostrar("No portes cap '" + nom + "' a sobre.");
             return;
         }
 
@@ -400,21 +382,13 @@ public class Joc {
             } else if (gonzaloAqui && gonzalo.isDespert()) {
                 gonzalo.menjarGaletes(galetes);
                 jugador.deixar(obj);
-                System.out.println();
-                System.out.println("  En Gonzalo es menja les galetes, entretingut. De moment no rondarà.");
-                System.out.println();
+                mostrar("En Gonzalo es menja les galetes, entretingut. De moment no rondarà.");
             } else if (bestiaAqui) {
-                System.out.println();
-                System.out.println("  La Bèstia ja està distreta amb les galetes.");
-                System.out.println();
+                mostrar("La Bèstia ja està distreta amb les galetes.");
             } else if (gonzaloAqui) {
-                System.out.println();
-                System.out.println("  En Gonzalo dorm plàcidament. No et fa cas.");
-                System.out.println();
+                mostrar("En Gonzalo dorm plàcidament. No et fa cas.");
             } else {
-                System.out.println();
-                System.out.println("  Ofereixes les galetes... però aquí no hi ha ningú.");
-                System.out.println();
+                mostrar("Ofereixes les galetes... però aquí no hi ha ningú.");
             }
             return;
         }
@@ -422,6 +396,10 @@ public class Joc {
         if (obj instanceof AbricDeProteccio abric) {
             if (jugador.isAbricPosat()) {
                 abric.treure(jugador);
+                if (zonaActual.getNom().equals("Celler de la Caldera")) {
+                    mostrar("Et treus l'abric en ple vapor roent. Et crema viu. Has perdut.");
+                    estat = false;
+                }
             } else {
                 abric.posar(jugador);
             }
@@ -431,6 +409,18 @@ public class Joc {
         if (obj instanceof ClauAnglesa clau) {
             if (bestia != null && zonaActual == bestia.getZonaActual() && !bestia.isDistreta()) {
                 clau.usarContraBestia(bestia, jugador);
+                return;
+            }
+            if (zonaActual.getNom().equals("Celler de la Caldera")) {
+                if (calderaReparada) {
+                    mostrar("La caldera ja està reparada. Només cal tornar al Despatx a estabilitzar el sistema.");
+                } else if (!jugador.isAbricPosat()) {
+                    mostrar("El vapor roent et impedeix treballar. Posa't l'AbricDeProteccio primer: USAR ABRIC");
+                } else {
+                    clau.repararCaldera();
+                    calderaReparada = true;
+                    mostrar("La caldera deixa de xiular. L'has reparada! Ara torna al Despatx del Senyor a estabilitzar el sistema.");
+                }
                 return;
             }
         }
@@ -450,88 +440,57 @@ public class Joc {
         if (!estaAFosques()) {
             return false;
         }
-        System.out.println();
-        System.out.println("  És massa fosc, no veus res. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
-        System.out.println();
+        mostrar("És massa fosc, no veus res. Pots tornar enrere o encendre una llum (ENCENDRE LLANTERNA).");
         return true;
     }
 
     private Objecte buscarInventari(String nom) {
-        if (nom == null || nom.isEmpty()) {
-            return null;
-        }
-        Objecte exacte = jugador.obtenirObjecte(nom);
-        if (exacte != null) {
-            return exacte;
-        }
-        String clau = nom.toLowerCase();
-        for (Objecte obj : jugador.getInventari().getObjectes()) {
-            if (obj.getNom().toLowerCase().contains(clau)) {
-                return obj;
-            }
-        }
-        return null;
+        return buscarPerNom(jugador.getInventari().getObjectes(), nom);
     }
 
     public void encendre(String nom) {
         if (nom == null || nom.isEmpty()) {
-            System.out.println();
-            System.out.println("  Què vols encendre? Escriu: ENCENDRE [objecte]");
-            System.out.println();
+            mostrar("Què vols encendre? Escriu: ENCENDRE [objecte]");
             return;
         }
 
         Objecte obj = buscarInventari(nom);
         if (obj == null) {
-            System.out.println();
-            System.out.println("  No portes cap '" + nom + "' a sobre.");
-            System.out.println();
+            mostrar("No portes cap '" + nom + "' a sobre.");
             return;
         }
 
         if (obj instanceof LlanternaDeQuerosè ll) {
             if (ll.isEncesa()) {
-                System.out.println();
-                System.out.println("  La llanterna ja està encesa.");
-                System.out.println();
+                mostrar("La llanterna ja està encesa.");
             } else {
                 ll.encendre();
             }
         } else {
-            System.out.println();
-            System.out.println("  No pots encendre " + obj.getNom() + ".");
-            System.out.println();
+            mostrar("No pots encendre " + obj.getNom() + ".");
         }
     }
 
     public void apagar(String nom) {
         if (nom == null || nom.isEmpty()) {
-            System.out.println();
-            System.out.println("  Què vols apagar? Escriu: APAGAR [objecte]");
-            System.out.println();
+            mostrar("Què vols apagar? Escriu: APAGAR [objecte]");
             return;
         }
 
         Objecte obj = buscarInventari(nom);
         if (obj == null) {
-            System.out.println();
-            System.out.println("  No portes cap '" + nom + "' a sobre.");
-            System.out.println();
+            mostrar("No portes cap '" + nom + "' a sobre.");
             return;
         }
 
         if (obj instanceof LlanternaDeQuerosè ll) {
             if (!ll.isEncesa()) {
-                System.out.println();
-                System.out.println("  La llanterna ja està apagada.");
-                System.out.println();
+                mostrar("La llanterna ja està apagada.");
             } else {
                 ll.apagar();
             }
         } else {
-            System.out.println();
-            System.out.println("  No pots apagar " + obj.getNom() + ".");
-            System.out.println();
+            mostrar("No pots apagar " + obj.getNom() + ".");
         }
     }
 
@@ -547,41 +506,32 @@ public class Joc {
             } else {
                 resposta = majordom.parlar(objectiu);
             }
-            System.out.println();
-            System.out.println("  " + resposta);
-            System.out.println();
+            mostrar(resposta);
             return;
         }
 
         if (gonzalo != null && zonaActual == gonzalo.getZonaActual()) {
-            System.out.println();
-            System.out.println("  En Gonzalo diu: \"" + gonzalo.parlar(objectiu) + "\"");
-            System.out.println();
+            mostrar("En Gonzalo diu: \"" + gonzalo.parlar(objectiu) + "\"");
             return;
         }
 
         if (bestia != null && zonaActual == bestia.getZonaActual()) {
-            System.out.println();
-            System.out.println("  La Bèstia no parla, només grunyeix: \"" + bestia.parlar(objectiu) + "\"");
-            System.out.println();
+            mostrar("La Bèstia no parla, només grunyeix: \"" + bestia.parlar(objectiu) + "\"");
             return;
         }
 
-        System.out.println();
-        System.out.println("  Aquí no hi ha ningú amb qui parlar.");
-        System.out.println();
+        mostrar("Aquí no hi ha ningú amb qui parlar.");
     }
 
     private void comprovarBestia() {
         if (bestia == null || zonaActual != bestia.getZonaActual()) {
             return;
         }
-        System.out.println();
         if (bestia.isDistreta()) {
-            System.out.println("  La Bèstia continua distreta amb les galetes.");
-            System.out.println();
+            mostrar("La Bèstia continua distreta amb les galetes.");
             return;
         }
+        System.out.println();
         System.out.println("  La Bèstia és aquí, amagada entre les ombres!");
         bestia.atacar(jugador);
         if (jugador.getInventari().conte("GaletesDeTe")) {
@@ -596,14 +546,12 @@ public class Joc {
         if (gonzalo == null || zonaActual != gonzalo.getZonaActual()) {
             return;
         }
-        System.out.println();
         if (!gonzalo.isDespert()) {
             gonzalo.despertar();
-            System.out.println("  En Gonzalo es desperta sobresaltat! A partir d'ara voltarà per la mansió buscant dolços.");
+            mostrar("En Gonzalo es desperta sobresaltat! A partir d'ara voltarà per la mansió buscant dolços.");
         } else {
-            System.out.println("  En Gonzalo és aquí, despistat.");
+            mostrar("En Gonzalo és aquí, despistat.");
         }
-        System.out.println();
     }
 
     private void passarTorn() {
@@ -611,30 +559,23 @@ public class Joc {
         tornBestia();
         jugador.decrementarEnverinament();
         if (jugador.haMortEnverinat()) {
-            System.out.println();
-            System.out.println("  El verí t'ha matat. Has perdut.");
-            System.out.println();
+            mostrar("El verí t'ha matat. Has perdut.");
             estat = false;
+            return;
+        }
+        if (calderaReparada) {
             return;
         }
         tornsCaldera--;
         if (tornsCaldera <= 0) {
-            System.out.println();
-            System.out.println("  La Caldera de Vapor ha explotat i s'ha emportat la mansió pels aires. Has perdut.");
-            System.out.println();
+            mostrar("La Caldera de Vapor ha explotat i s'ha emportat la mansió pels aires. Has perdut.");
             estat = false;
         } else if (tornsCaldera == 10) {
-            System.out.println();
-            System.out.println("  La caldera xiula cada cop més fort... queden 10 torns!");
-            System.out.println();
+            mostrar("La caldera xiula cada cop més fort... queden 10 torns!");
         } else if (tornsCaldera == 5) {
-            System.out.println();
-            System.out.println("  Les juntes de la caldera cedeixen... queden 5 torns!");
-            System.out.println();
+            mostrar("Les juntes de la caldera cedeixen... queden 5 torns!");
         } else if (tornsCaldera <= 3) {
-            System.out.println();
-            System.out.println("  La caldera està a punt d'explotar... queden " + tornsCaldera + " torns!");
-            System.out.println();
+            mostrar("La caldera està a punt d'explotar... queden " + tornsCaldera + " torns!");
         }
     }
 
@@ -657,9 +598,7 @@ public class Joc {
             zg.eliminarObjecte(dolc);
             gonzalo.menjarGaletes(dolc);
             if (zg == zonaActual && !estaAFosques()) {
-                System.out.println();
-                System.out.println("  En Gonzalo es menja les GaletesDeTe que troba. Es queda entretingut.");
-                System.out.println();
+                mostrar("En Gonzalo es menja les GaletesDeTe que troba. Es queda entretingut.");
             }
             return;
         }
@@ -670,9 +609,7 @@ public class Joc {
         Zona abans = zg;
         gonzalo.moureAleatoriament();
         if (gonzalo.getZonaActual() != abans && gonzalo.getZonaActual() == zonaActual && !estaAFosques()) {
-            System.out.println();
-            System.out.println("  En Gonzalo entra voltant, despistat.");
-            System.out.println();
+            mostrar("En Gonzalo entra voltant, despistat.");
         }
     }
 
@@ -697,6 +634,7 @@ public class Joc {
         zonaActual = null;
         zonaAnterior = null;
         tornsCaldera = 20;
+        calderaReparada = false;
         bestia = null;
         majordom = null;
         gonzalo = null;
@@ -716,6 +654,10 @@ public class Joc {
 
     public int getTornsCaldera() {
         return tornsCaldera;
+    }
+
+    public boolean isCalderaReparada() {
+        return calderaReparada;
     }
 
     public Bestia getBestia() {

@@ -9,6 +9,7 @@ import java.util.Random;
 
 public class ServentGonzalo extends Personatge {
 
+    private static final Random ALEATORI = new Random();
     private boolean despert;
     private boolean entretingut;
 
@@ -44,7 +45,7 @@ public class ServentGonzalo extends Personatge {
         if (obertes.isEmpty()) {
             return;
         }
-        setZonaActual(obertes.get(new Random().nextInt(obertes.size())).getZonaDesti());
+        setZonaActual(obertes.get(ALEATORI.nextInt(obertes.size())).getZonaDesti());
     }
 
     public void menjarGaletes(GaletesDeTe galetes) {
