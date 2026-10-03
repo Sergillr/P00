@@ -1,7 +1,7 @@
-package com.example.model.objecte;
+package com.game.model.objecte;
 
-import com.example.model.Objecte;
-import com.example.model.Personatge;
+import com.game.model.Objecte;
+import com.game.model.Personatge;
 
 public class GaletesDeTe extends Objecte {
 

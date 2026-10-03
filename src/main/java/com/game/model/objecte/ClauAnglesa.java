@@ -1,8 +1,8 @@
-package com.example.model.objecte;
+package com.game.model.objecte;
 
-import com.example.model.personatges.Bestia;
-import com.example.model.Jugador;
-import com.example.model.Objecte;
+import com.game.model.personatges.Bestia;
+import com.game.model.Jugador;
+import com.game.model.Objecte;
 
 public class ClauAnglesa extends Objecte {
 

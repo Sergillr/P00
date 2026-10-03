@@ -1,10 +1,10 @@
-package com.example.model.personatges;
+package com.game.model.personatges;
 
-import com.example.model.Mansio;
-import com.example.model.Personatge;
-import com.example.model.Porta;
-import com.example.model.Zona;
-import com.example.model.objecte.LlanternaDeQuerosè;
+import com.game.model.Mansio;
+import com.game.model.Personatge;
+import com.game.model.Porta;
+import com.game.model.Zona;
+import com.game.model.objecte.LlanternaDeQuerosè;
 
 public class Majordom extends Personatge {
 

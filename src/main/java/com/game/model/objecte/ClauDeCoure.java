@@ -1,6 +1,6 @@
-package com.example.model.objecte;
+package com.game.model.objecte;
 
-import com.example.model.Objecte;
+import com.game.model.Objecte;
 
 public class ClauDeCoure extends Objecte {
 

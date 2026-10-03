@@ -1,6 +1,6 @@
-package com.example.model;
+package com.game.model;
 
-import com.example.model.objecte.ClauDeCoure;
+import com.game.model.objecte.ClauDeCoure;
 
 public class Porta {
 

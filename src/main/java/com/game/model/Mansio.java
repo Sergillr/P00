@@ -1,13 +1,13 @@
-package com.example.model;
+package com.game.model;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.example.model.objecte.AbricDeProteccio;
-import com.example.model.objecte.ClauAnglesa;
-import com.example.model.objecte.ClauDeCoure;
-import com.example.model.objecte.GaletesDeTe;
-import com.example.model.objecte.LlanternaDeQuerosè;
+import com.game.model.objecte.AbricDeProteccio;
+import com.game.model.objecte.ClauAnglesa;
+import com.game.model.objecte.ClauDeCoure;
+import com.game.model.objecte.GaletesDeTe;
+import com.game.model.objecte.LlanternaDeQuerosè;
 
 public class Mansio {
 

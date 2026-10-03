@@ -1,10 +1,10 @@
-package com.example.model.personatges;
+package com.game.model.personatges;
 
-import com.example.model.Jugador;
-import com.example.model.Personatge;
-import com.example.model.Porta;
-import com.example.model.Zona;
-import com.example.model.objecte.GaletesDeTe;
+import com.game.model.Jugador;
+import com.game.model.Personatge;
+import com.game.model.Porta;
+import com.game.model.Zona;
+import com.game.model.objecte.GaletesDeTe;
 import java.util.ArrayList;
 import java.util.Random;
 

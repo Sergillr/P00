@@ -1,6 +1,6 @@
-package com.example.core;
+package com.game.core;
 
-import com.example.ui.Menu;
+import com.game.ui.Menu;
 
 public class Main {
 
