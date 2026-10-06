@@ -92,6 +92,9 @@ public class Joc {
         System.out.println();
         System.out.println();
         System.out.println(zonaActual.mostrarDescripcio(!estaAFosques()));
+        if (!estaAFosques()) {
+            avisarPresencia();
+        }
     }
 
     private Zona zonaMesAllunyada(Zona origen) {
@@ -213,8 +216,7 @@ public class Joc {
                 return;
             }
             if (!estaAFosques()) {
-                comprovarBestia();
-                comprovarGonzalo();
+                avisarPresencia();
             }
         }
     }
@@ -521,6 +523,20 @@ public class Joc {
         }
 
         mostrar("Aquí no hi ha ningú amb qui parlar.");
+    }
+
+    private void avisarPresencia() {
+        comprovarMajordom();
+        comprovarGonzalo();
+        comprovarBestia();
+    }
+
+    private void comprovarMajordom() {
+        if (majordom == null || zonaActual != majordom.getZonaActual()) {
+            return;
+        }
+        mostrar("El Majordom és aquí, esperant ordres. Pots parlar-hi: PARLAR MAJORDOM",
+                "També et pot obrir les portes tancades.");
     }
 
     private void comprovarBestia() {
