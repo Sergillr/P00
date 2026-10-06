@@ -533,11 +533,10 @@ public class Joc {
         }
         System.out.println();
         System.out.println("  La Bèstia és aquí, amagada entre les ombres!");
-        bestia.atacar(jugador);
         if (jugador.getInventari().conte("GaletesDeTe")) {
             System.out.println("  Portes GaletesDeTe a sobre. Pots distreure-la oferint-li galetes: USAR GALETESDETE");
         } else {
-            System.out.println("  No portes res per distreure-la... Millor no atacar-la directament.");
+            System.out.println("  No portes res per distreure-la... Vigila, si entra a la teva sala t'atacarà.");
         }
         System.out.println();
     }
